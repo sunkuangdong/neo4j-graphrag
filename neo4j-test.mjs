@@ -9,55 +9,55 @@ const session = driver.session();
 
 async function createData() {
     await session.run(`
-        CREATE (p:Product {name:"珍珠奶茶"})
-        CREATE (i:Ingredient {name:"珍珠"})
+        CREATE (p:Product {name:"Pearl Milk Tea"})
+        CREATE (i:Ingredient {name:"Tapioca Pearls"})
     `);
-    console.log('创建成功')
+    console.log('Nodes created')
 }
 
 async function createRelation() {
     await session.run(`
-        MATCH (p:Product {name: "珍珠奶茶"}), (i:Ingredient {name: "珍珠"})
-        CREATE (p)-[:包含]->(i)
+        MATCH (p:Product {name: "Pearl Milk Tea"}), (i:Ingredient {name: "Tapioca Pearls"})
+        CREATE (p)-[:CONTAINS]->(i)
     `);
-    console.log('创建关系成功')
+    console.log('Relationship created')
 }
 
 async function queryData() {
     const result = await session.run(`
-        MATCH (p:Product {name: "珍珠奶茶"})-[r]->(i)
+        MATCH (p:Product {name: "Pearl Milk Tea"})-[r]->(i)
         RETURN p, r, i
     `)
     result.records.forEach(record => {
-        console.log('奶茶:', record.get('p').properties.name)
-        console.log('关系:', record.get('r').type)
-        console.log('配料:', record.get('i').properties.name)
+        console.log('Product:', record.get('p').properties.name)
+        console.log('Relationship:', record.get('r').type)
+        console.log('Ingredient:', record.get('i').properties.name)
         console.log('--------------------------------')
     })
 }
 
 async function updateData() {
     await session.run(`
-        MATCH (p:Product {name: "珍珠奶茶"})
-        SET p.price = 15, p.calorie = "中高"
+        MATCH (p:Product {name: "Pearl Milk Tea"})
+        SET p.price = 15, p.calorie = "medium-high"
     `)
-    console.log('更新成功')
+    console.log('Update successful')
 }
 
 async function deleteRelation() {
     await session.run(`
-      MATCH (p:Product {name: "珍珠奶茶"})-[r:包含]->(i:Ingredient {name: "珍珠"})
+      MATCH (p:Product {name: "Pearl Milk Tea"})-[r:CONTAINS]->(i:Ingredient {name: "Tapioca Pearls"})
       DELETE r
     `)
-    console.log('删除关系成功')
+    console.log('Relationship deleted')
 }
 
 async function deleteNode() {
     await session.run(`
-      MATCH (p:Product {name: "珍珠奶茶"})
-      DELETE p
+      MATCH (p:Product {name: "Pearl Milk Tea"})
+      DETACH DELETE p
     `)
-    console.log('删除节点成功')
+    console.log('Node deleted')
 }
 
 async function main() {

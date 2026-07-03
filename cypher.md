@@ -1,67 +1,90 @@
-# Neo4j Cypher 语句实战：奶茶知识图谱
-## 一、创建实体（节点）
-### 1. 创建奶茶品类
-CREATE (product:Product {name: "珍珠奶茶"})
-CREATE (type1:Type {name: "台式奶茶"})
-CREATE (type2:Type {name: "港式奶茶"})
+# Neo4j Cypher: Bubble Tea Knowledge Graph
 
-### 2. 创建配料
-CREATE (ing1:Ingredient {name: "珍珠"})
-CREATE (ing2:Ingredient {name: "芋圆"})
-CREATE (ing3:Ingredient {name: "果糖"})
-CREATE (ing4:Ingredient {name: "红茶"})
-CREATE (ing5:Ingredient {name: "牛奶"})
+## 1. Create nodes
 
-### 3. 创建制作工艺 & 适用人群
-CREATE (method1:Method {name: "煮制"})
-CREATE (method2:Method {name: "冲泡"})
+### Products and types
 
-CREATE (people1:People {name: "年轻人"})
-CREATE (people2:People {name: "学生"})
-CREATE (people3:People {name: "甜食爱好者"})
+```cypher
+CREATE (product:Product {name: "Pearl Milk Tea"})
+CREATE (type1:Type {name: "Taiwanese Milk Tea"})
+CREATE (type2:Type {name: "Hong Kong Milk Tea"})
+```
 
-## 二、创建关系（知识图谱核心）
-// 珍珠奶茶 属于 台式奶茶
-MATCH (p:Product {name: "珍珠奶茶"}), (t:Type {name: "台式奶茶"})
-CREATE (p)-[:属于]->(t)
+### Ingredients
 
-// 珍珠奶茶 包含 配料
-MATCH (p:Product {name: "珍珠奶茶"}), (i:Ingredient {name: "珍珠"})
-CREATE (p)-[:包含]->(i)
+```cypher
+CREATE (ing1:Ingredient {name: "Tapioca Pearls"})
+CREATE (ing2:Ingredient {name: "Taro Balls"})
+CREATE (ing3:Ingredient {name: "Fructose"})
+CREATE (ing4:Ingredient {name: "Black Tea"})
+CREATE (ing5:Ingredient {name: "Milk"})
+```
 
-MATCH (p:Product {name: "珍珠奶茶"}), (i:Ingredient {name: "果糖"})
-CREATE (p)-[:包含]->(i)
+### Methods and target audiences
 
-MATCH (p:Product {name: "珍珠奶茶"}), (i:Ingredient {name: "红茶"})
-CREATE (p)-[:包含]->(i)
+```cypher
+CREATE (method1:Method {name: "Boiling"})
+CREATE (method2:Method {name: "Brewing"})
 
-MATCH (p:Product {name: "珍珠奶茶"}), (i:Ingredient {name: "牛奶"})
-CREATE (p)-[:包含]->(i)
+CREATE (people1:People {name: "Young Adults"})
+CREATE (people2:People {name: "Students"})
+CREATE (people3:People {name: "Dessert Lovers"})
+```
 
-// 配料 使用 制作工艺
-MATCH (i:Ingredient {name: "珍珠"}), (m:Method {name: "煮制"})
-CREATE (i)-[:使用]->(m)
+## 2. Create relationships
 
-// 珍珠奶茶 适合 人群
-MATCH (p:Product {name: "珍珠奶茶"}), (peo:People {name: "年轻人"})
-CREATE (p)-[:适合]->(peo)
+```cypher
+// Pearl Milk Tea belongs to Taiwanese Milk Tea
+MATCH (p:Product {name: "Pearl Milk Tea"}), (t:Type {name: "Taiwanese Milk Tea"})
+CREATE (p)-[:BELONGS_TO]->(t)
 
-MATCH (p:Product {name: "珍珠奶茶"}), (peo:People {name: "学生"})
-CREATE (p)-[:适合]->(peo)
+// Pearl Milk Tea contains ingredients
+MATCH (p:Product {name: "Pearl Milk Tea"}), (i:Ingredient {name: "Tapioca Pearls"})
+CREATE (p)-[:CONTAINS]->(i)
 
-MATCH (p:Product {name: "珍珠奶茶"}), (peo:People {name: "甜食爱好者"})
-CREATE (p)-[:适合]->(peo)
+MATCH (p:Product {name: "Pearl Milk Tea"}), (i:Ingredient {name: "Fructose"})
+CREATE (p)-[:CONTAINS]->(i)
 
-## 三、查询验证
-### 1. 查询全部节点与关系
+MATCH (p:Product {name: "Pearl Milk Tea"}), (i:Ingredient {name: "Black Tea"})
+CREATE (p)-[:CONTAINS]->(i)
+
+MATCH (p:Product {name: "Pearl Milk Tea"}), (i:Ingredient {name: "Milk"})
+CREATE (p)-[:CONTAINS]->(i)
+
+// Ingredients use preparation methods
+MATCH (i:Ingredient {name: "Tapioca Pearls"}), (m:Method {name: "Boiling"})
+CREATE (i)-[:USES]->(m)
+
+// Pearl Milk Tea suitable for audiences
+MATCH (p:Product {name: "Pearl Milk Tea"}), (peo:People {name: "Young Adults"})
+CREATE (p)-[:SUITABLE_FOR]->(peo)
+
+MATCH (p:Product {name: "Pearl Milk Tea"}), (peo:People {name: "Students"})
+CREATE (p)-[:SUITABLE_FOR]->(peo)
+
+MATCH (p:Product {name: "Pearl Milk Tea"}), (peo:People {name: "Dessert Lovers"})
+CREATE (p)-[:SUITABLE_FOR]->(peo)
+```
+
+## 3. Verify queries
+
+### All nodes and relationships
+
+```cypher
 MATCH (n)-[r]->(m)
 RETURN n, r, m
+```
 
-### 2. 多跳关联查询（GraphRAG 能力）
-// 查询：珍珠奶茶 → 配料 → 制作工艺
-MATCH (p:Product {name: "珍珠奶茶"})-[:包含]->(i)-[:使用]->(m)
+### Multi-hop queries (GraphRAG)
+
+```cypher
+// Pearl Milk Tea → ingredients → preparation method
+MATCH (p:Product {name: "Pearl Milk Tea"})-[:CONTAINS]->(i)-[:USES]->(m)
 RETURN p.name, i.name, m.name
+```
 
-// 查询：珍珠奶茶适合哪些人
-MATCH (p:Product {name: "珍珠奶茶"})-[:适合]->(people)
+```cypher
+// Who is Pearl Milk Tea suitable for?
+MATCH (p:Product {name: "Pearl Milk Tea"})-[:SUITABLE_FOR]->(people)
 RETURN p.name, people.name
+```

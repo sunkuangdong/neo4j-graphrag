@@ -1,29 +1,43 @@
-1. 更新：给珍珠奶茶加热量属性
+# Advanced Cypher examples
 
-MATCH (p:Product {name:"珍珠奶茶"})
-SET p.calorie = "中高热量", p.taste = "甜香"
+## 1. Update product properties
 
-2. 更新：修改珍珠工艺属性
+```cypher
+MATCH (p:Product {name:"Pearl Milk Tea"})
+SET p.calorie = "medium-high", p.taste = "sweet and fragrant"
+```
 
-MATCH (i:Ingredient {name:"珍珠"})
-SET i.origin = "台湾", i.hard = "Q 弹"
+## 2. Update ingredient properties
 
-3. 只删除某一条关系
+```cypher
+MATCH (i:Ingredient {name:"Tapioca Pearls"})
+SET i.origin = "Taiwan", i.texture = "chewy"
+```
 
-// 删除 珍珠奶茶 适合 学生 这条关系
-MATCH (p:Product {name:"珍珠奶茶"})-[r: 适合]->(s:People {name:"学生"})
+## 3. Delete a single relationship
+
+```cypher
+// Remove: Pearl Milk Tea -SUITABLE_FOR-> Students
+MATCH (p:Product {name:"Pearl Milk Tea"})-[r:SUITABLE_FOR]->(s:People {name:"Students"})
 DELETE r
+```
 
-4. 删除单个节点（无关联才可删）
+## 4. Delete a node with no relationships
 
-MATCH (t:Type {name:"港式奶茶"})
+```cypher
+MATCH (t:Type {name:"Hong Kong Milk Tea"})
 DELETE t
+```
 
-5. 删除节点 + 连带所有关系
+## 5. Delete a node and all its relationships
 
-MATCH (i:Ingredient {name:"芋圆"})-[r]-()
+```cypher
+MATCH (i:Ingredient {name:"Taro Balls"})-[r]-()
 DELETE r, i
+```
 
-6. 清空所有节点和关系（本地测试用）
+## 6. Clear the entire graph (local testing only)
 
+```cypher
 MATCH (n) DETACH DELETE n
+```
